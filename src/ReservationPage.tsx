@@ -24,6 +24,7 @@ export const ReservationPage = () => {
     return (
         <div className="bg-gray-950 text-white min-h-screen flex flex-col justify-center items-center">
             <h1 className="text-2xl text-center font-bold font-sans mb-4">Reserva de horários no Play e no Jóquei</h1>
+            <h2 className="text-xl text-center font-bold pb-2">Selecione um dos clubes:</h2>
             <div className="flex mb-4">
                 {locations.map((location) => (
                     <button
