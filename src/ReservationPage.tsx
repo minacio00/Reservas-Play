@@ -112,16 +112,12 @@ export const ReservationPage = () => {
   const getSelectedCourtData = () => {
     const selectedLocationData = getSelectedLocationData();
     if (!selectedLocationData) return null;
-    // return selectedLocationData.openingHours.find((dayData: any) =>
-    //   dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
-    // );
     const filteredDays = selectedLocationData.openingHours.map((day: any) => ({
       dia: day.dia,
       timeSlots: day.quadras
         .filter((quadra: any) => quadra.nomeQuadra === selectedCourt)
         .map((quadra: any) => quadra.timeSlots)
     }));
-    console.log(filteredDays, "dias filtrados")
     return filteredDays
   };
 
