@@ -1,7 +1,7 @@
 import { AdminPage } from './AdminPage';
 import './App.css'
 import { ReservationPage } from './ReservationPage'
-import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 function App() {
 
