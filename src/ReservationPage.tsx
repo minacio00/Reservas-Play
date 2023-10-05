@@ -1,25 +1,28 @@
 import 'firebase/firestore';
 import { useEffect, useState } from "react";
 import { firebaseApp } from "../firebaseConfig";
-import { addDoc, collection, doc, getDoc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
+import {doc, getDoc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
 import ReservationModal from './ReservationModal';
 
 export const ReservationPage = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>("Joquei");
   const [selectedCourt, setSelectedCourt] = useState<string | null>("Quadra-1");
   const [isCourtSelected, setIsCourtSelected] = useState(false);
-  const timeSlots = ['9:00 AM - 10:30 AM', '10:30 AM - 12:00 PM', '12:00 PM - 1:30 PM'];
+  // const timeSlots = ['9:00 AM - 10:30 AM', '10:30 AM - 12:00 PM', '12:00 PM - 1:30 PM'];
   const [funcionamento, setFuncionamento] = useState<any[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const [opponentName, setOpponentName] = useState("");
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<any | null>(null);
+  const [selectedDay, setSelectedDay] = useState("")
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleTimeSlotClick = (timeSlot: any) => {
+  const handleTimeSlotClick = (timeSlot: any, day: any) => {
     setSelectedTimeSlot(timeSlot);
     setIsModalOpen(true);
+    console.log(day, "dia capturado")
+    setSelectedDay(day)
   };
 
   const handleModalClose = () => {
@@ -40,10 +43,13 @@ export const ReservationPage = () => {
   const handleConfirmReservation = async () => {
     if (selectedTimeSlot) {
       const updatedFuncionamento = [...funcionamento]; // Create a copy of funcionamento
+      debugger
       const selectedLocationIndex = updatedFuncionamento.findIndex((locationData) => locationData.name === selectedLocation);
       if (selectedLocationIndex !== -1) {
         const selectedDayIndex = updatedFuncionamento[selectedLocationIndex].openingHours.findIndex((dayData: any) =>
-          dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
+            dayData.dia === selectedDay
+            //dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
+          
         );
         if (selectedDayIndex !== -1) {
           const selectedQuadraIndex = updatedFuncionamento[selectedLocationIndex].openingHours[selectedDayIndex].quadras.findIndex((quadra: any) =>
@@ -76,8 +82,8 @@ export const ReservationPage = () => {
   };
 
   const locations = [
-    { name: 'joquei', courts: ['Quadra-1', 'Quadra-2', 'Quadra-3'] },
     { name: 'play', courts: ['Quadra-1'] },
+    { name: 'joquei', courts: ['Quadra-1', 'Quadra-2', 'Quadra-3'] },
   ];
   const handleLocationClick = (locationName: string) => {
     setSelectedLocation(locationName);
@@ -93,7 +99,7 @@ export const ReservationPage = () => {
     const db = getFirestore(firebaseApp);
     try {
       const docsRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu")
-      const snapshot = await getDoc(docsRef)
+      const snapshot = await getDocFromServer(docsRef) //todo: from server
       // console.log(snapshot.data()?.funcionamento)
       const funcionamentoData = snapshot.data()?.funcionamento;
       setFuncionamento(funcionamentoData);
@@ -112,16 +118,13 @@ export const ReservationPage = () => {
   const getSelectedCourtData = () => {
     const selectedLocationData = getSelectedLocationData();
     if (!selectedLocationData) return null;
-    // return selectedLocationData.openingHours.find((dayData: any) =>
-    //   dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
-    // );
     const filteredDays = selectedLocationData.openingHours.map((day: any) => ({
       dia: day.dia,
       timeSlots: day.quadras
         .filter((quadra: any) => quadra.nomeQuadra === selectedCourt)
         .map((quadra: any) => quadra.timeSlots)
     }));
-    console.log(filteredDays, "dias filtrados")
+    // console.log("filtrados: ", filteredDays)
     return filteredDays
   };
 
@@ -133,7 +136,7 @@ export const ReservationPage = () => {
   if (isLoading) {
     return (
       <div className="bg-gray-950 text-white font-bold min-h-screen flex flex-col justify-center items-center">
-        <p>Loading...</p>
+        <p>Carregando...</p>
       </div>
     )
   } else {
@@ -192,7 +195,7 @@ export const ReservationPage = () => {
                     dayData.timeSlots[0].map((timeSlot: any) => (
                       <div key={timeSlot.slot}>
                         <button
-                          onClick={() => handleTimeSlotClick(timeSlot)}
+                          onClick={() => handleTimeSlotClick(timeSlot, dayData.dia)}
                           className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full"
                         >
                           ({timeSlot.slot}) <br />
