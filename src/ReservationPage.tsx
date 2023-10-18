@@ -1,7 +1,7 @@
 import 'firebase/firestore';
 import { useEffect, useState } from "react";
 import { firebaseApp } from "../firebaseConfig";
-import {doc, getDoc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
+import {doc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
 import ReservationModal from './ReservationModal';
 
 export const ReservationPage = () => {
@@ -21,7 +21,6 @@ export const ReservationPage = () => {
   const handleTimeSlotClick = (timeSlot: any, day: any) => {
     setSelectedTimeSlot(timeSlot);
     setIsModalOpen(true);
-    console.log(day, "dia capturado")
     setSelectedDay(day)
   };
 
@@ -43,7 +42,6 @@ export const ReservationPage = () => {
   const handleConfirmReservation = async () => {
     if (selectedTimeSlot) {
       const updatedFuncionamento = [...funcionamento]; // Create a copy of funcionamento
-      debugger
       const selectedLocationIndex = updatedFuncionamento.findIndex((locationData) => locationData.name === selectedLocation);
       if (selectedLocationIndex !== -1) {
         const selectedDayIndex = updatedFuncionamento[selectedLocationIndex].openingHours.findIndex((dayData: any) =>

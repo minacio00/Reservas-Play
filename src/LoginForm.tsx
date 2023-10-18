@@ -1,16 +1,20 @@
 import { useState } from "react";
+// import { firebaseApp } from "../firebaseConfig";
+// import { getAuth } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { firebaseApp } from "../firebaseConfig";
-import { getAuth } from "firebase/auth";
-import firebase from "firebase/compat/app";
-
+interface LoginFormProps {
+ 
+}
 const LoginForm = () => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-   const auth = getAuth(firebaseApp)
-   firebase.auth().signInWithEmailAndPassword(user, password);
+//    const auth = getAuth(firebaseApp)
+  const auth = getAuth(firebaseApp)
+   signInWithEmailAndPassword(auth, user, password);
   };
 
   return (

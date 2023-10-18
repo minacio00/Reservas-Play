@@ -1,14 +1,14 @@
 const timeSlots = [
-    { slot: "07:00", jogador1: "", jogador2: "" },
-    { slot: "8:30", jogador1: "", jogador2: "" },
-    { slot: "10:00", jogador1: "", jogador2: "" },
-    { slot: "11:30", jogador1: "", jogador2: "" },
-    { slot: "13:00", jogador1: "", jogador2: "" },
-    { slot: "14:30", jogador1: "", jogador2: "" },
-    { slot: "16:00", jogador1: "", jogador2: "" },
-    { slot: "17:30", jogador1: "", jogador2: "" },
-    { slot: "19:00", jogador1: "", jogador2: "" },
-    { slot: "20:30", jogador1: "", jogador2: "" }
+    { slot: "07:00", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "08:30", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "10:00", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "11:30", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "13:00", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "14:30", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "16:00", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "17:30", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "19:00", jogador1: "", jogador2: "", disponivel: true},
+    { slot: "20:30", jogador1: "", jogador2: "", disponivel: true}
   ];
   
   interface Dia {
@@ -82,7 +82,7 @@ const timeSlots = [
     timeSlots: timeSlots
   };
   
-  export const funcionamento = [
+  export const funcionamentoArr = [
     {
       name: "joquei",
       openingHours: diasDaSemana
