@@ -6,13 +6,15 @@ import { firebaseApp } from "../firebaseConfig";
 import ReservationModal from "./ReservationModal";
 import { doc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
 import { resetPlayers } from "./Helpers/resetPLayers";
-import {funcionamentoArr} from "../data";
+import { funcionamentoArr } from "../data";
+import TimeslotsList from "./TimeslotsList";
 
 export function AdminPage() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>("Joquei");
   const [selectedCourt, setSelectedCourt] = useState<string | null>("Quadra-1");
   const [isCourtSelected, setIsCourtSelected] = useState(false);
   // const timeSlots = ['9:00 AM - 10:30 AM', '10:30 AM - 12:00 PM', '12:00 PM - 1:30 PM'];
+  // const [selectedCourtData, setSelectedCourtData] = useState<any[]>([]);
   const [funcionamento, setFuncionamento] = useState<any[]>(funcionamentoArr);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,6 +23,7 @@ export function AdminPage() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<any | null>(null);
   const [selectedDay, setSelectedDay] = useState("")
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCourtData, setSelectedCourtData] = useState<any[]>()
 
   const handleTimeSlotClick = (timeSlot: any, day: any) => {
     setSelectedTimeSlot(timeSlot);
@@ -49,9 +52,9 @@ export function AdminPage() {
       const selectedLocationIndex = updatedFuncionamento.findIndex((locationData) => locationData.name === selectedLocation);
       if (selectedLocationIndex !== -1) {
         const selectedDayIndex = updatedFuncionamento[selectedLocationIndex].openingHours.findIndex((dayData: any) =>
-            dayData.dia === selectedDay
-            //dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
-          
+          dayData.dia === selectedDay
+          //dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
+
         );
         if (selectedDayIndex !== -1) {
           const selectedQuadraIndex = updatedFuncionamento[selectedLocationIndex].openingHours[selectedDayIndex].quadras.findIndex((quadra: any) =>
@@ -94,9 +97,10 @@ export function AdminPage() {
     setIsCourtSelected(false);
   };
 
-  const handleCourtClick = (courtName: string) => {
+  const handleCourtClick = async (courtName: string) => {
     setSelectedCourt(courtName);
     setIsCourtSelected(true);
+    console.log(selectedCourtData)
   };
   const fetchData = async () => {
     const db = getFirestore(firebaseApp);
@@ -123,7 +127,7 @@ export function AdminPage() {
     if (!selectedLocationData) return null;
     const filteredDays = selectedLocationData.openingHours.map((day: any) => ({
       dia: day.dia,
-      aberto: day.aberto, 
+      aberto: day.aberto,
       timeSlots: day.quadras
         .filter((quadra: any) => quadra.nomeQuadra === selectedCourt)
         .map((quadra: any) => {
@@ -133,15 +137,20 @@ export function AdminPage() {
           }))
         })
     }));
-    // console.log("filtrados: ", filteredDays)
+    // console.log("filtrados: ", filteredDays)D
     return filteredDays
   };
 
-  const selectedCourtData = getSelectedCourtData();
+  // const selectedCourtData = getSelectedCourtData();
+  // console.log(selectedCourtData)
   useEffect(() => {
     fetchData();
-
   }, [])
+
+  useEffect(() => {
+    setSelectedCourtData(getSelectedCourtData());
+  }, [isCourtSelected, selectedCourt])
+
   const [authenticated, setAuthenticated] = useState(false);
   useEffect(() => {
     // Set up the observer to check authentication status
@@ -157,103 +166,112 @@ export function AdminPage() {
     // Unsubscribe when the component unmounts
     return () => unsubscribe();
   }, []);
-  
-    return (
-      <div className="bg-gray-950 text-white min-h-screen flex flex-col justify-center items-center">
+
+  const handleToggleAberto = (day: string) => {
+    //todo: need to test this, but is seems like it's working
+    const selectedLocationData = getSelectedLocationData();
+    if (!selectedLocationData) return;
+    if (!selectedCourtData) return;
+
+    const updatedFuncionamento = JSON.parse(JSON.stringify(funcionamento));
+
+    const selectedLocationIndex = updatedFuncionamento.findIndex((locationData: any) => locationData.name === selectedLocation);
+    if (selectedLocationIndex !== -1) {
+      const selectedDayIndex = selectedLocationData.openingHours.findIndex((dayData: any) => dayData.dia === day);
+      if (selectedDayIndex !== -1) {
+        
+        const selectedQuadraIndex = updatedFuncionamento[selectedLocationIndex].openingHours[selectedDayIndex].quadras.findIndex((quadra: any) =>
+            quadra.nomeQuadra === selectedCourt
+          );
+        if (selectedQuadraIndex !== -1) {
+          // Toggle the value of aberto
+          const daydata = updatedFuncionamento[selectedLocationIndex].openingHours[selectedDayIndex]
+          daydata.aberto = !daydata.aberto;
+          const updatedSelectedCourtData = [...selectedCourtData];
+          const dayDataIndex = updatedSelectedCourtData.findIndex((dayData: any) => dayData.dia === day);
+          if (dayDataIndex !== -1) {
+            updatedSelectedCourtData[dayDataIndex].aberto = daydata.aberto
+          }
+          setFuncionamento(updatedFuncionamento)
+          setSelectedCourtData(updatedSelectedCourtData);
+          updateFuncionamentoData(updatedFuncionamento)
+          console.log(!daydata.aberto, "not daydata");
+        }
+      }
+    }
+  };
+  useEffect(() => {
+    console.log(funcionamento, "dentro do UE")
+  },[funcionamento])
+  return (
+    <div className="bg-gray-950 text-white min-h-screen flex flex-col justify-center items-center">
       {authenticated ? (
         <>
           <p>Welcome, you are authenticated!</p>
           <div className="bg-gray-950 text-white min-h-screen flex flex-col justify-center items-center">
-        <h1 className="text-2xl text-center font-bold font-sans mb-4">
-          Reserva de horários no Play e no Jóquei
-        </h1>
-        <button onClick={()=>{console.log("button clicked"); resetPlayers(funcionamento,setFuncionamento,updateFuncionamentoData)}}
-        className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-2/4">Resetar horários</button>
-        <h2 className="text-xl text-center font-bold pb-2">
-          Selecione um dos clubes:
-        </h2>
-        <div className="flex mb-4">
-          {locations.map((location) => (
-            <button
-              key={location.name}
-              onClick={() => handleLocationClick(location.name)}
-              className={`${selectedLocation === location.name ? 'border-blue-500' : 'border-gray-300'
-                } border-2 p-2 mx-2 rounded-md`}
-            >
-              <img
-                src={`${location.name}.jpg`}
-                alt={`Location ${location.name}`}
-                className="w-32 h-32"
-              />
-            </button>
-          ))}
-        </div>
-        {selectedLocation && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Quadras do {selectedLocation}</h2>
-            <div className="grid text-black grid-cols-1 gap-4">
-              {locations
-                .find((location) => location.name === selectedLocation)
-                ?.courts.map((courtName) => (
-                  <div
-                    key={courtName}
-                    className={`${selectedCourt === courtName ? 'bg-blue-400' : 'bg-indigo-900'
-                      } p-4 rounded-md shadow-md text-white text-center cursor-pointer`}
-                    onClick={() => handleCourtClick(courtName)}
-                  >
-                    <h3 className="text-lg font-semibold mb-2">{courtName}</h3>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {isCourtSelected && selectedCourtData && (
-          <div>
-            <h2 className="text-xl font-semibold mt-4">Horários disponíveis para {selectedCourt}</h2>
-            <button className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full">Salvar alterações</button>
-            <div className="grid grid-cols-1 gap-2 mt-2">
-              {selectedCourtData.map((dayData: any) => (
-                <div key={dayData.dia}>
-                  {/* {console.log(dayData.timeSlots)} */}
-                  <h3 className="text-lg font-semibold">{dayData.dia}</h3>
-                  <label htmlFor="">Aberto: </label>
-                  <input type="checkbox" name="disponível" checked={dayData.aberto} id={dayData.aberto}/>
-                  {dayData.timeSlots && dayData.timeSlots[0] ? (
-                    dayData.timeSlots[0].map((timeSlot: any) => (
-                      <div className="flex" key={timeSlot.slot}>
-                        <button
-                          onClick={() => handleTimeSlotClick(timeSlot, dayData.dia)}
-                          className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full"
-                        >
-                          ({timeSlot.slot}) <br />
-                          {timeSlot.jogador1} vs {timeSlot.jogador2}
-                        </button>
-                        <div className="px-2">
-                          <label>ativo: </label>
-                          <input type="checkbox" name="check" id={timeSlot.disponivel} checked={timeSlot.disponivel} />
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No time slots available for this day.</p>
-                  )}
-                </div>
+            <h1 className="text-2xl text-center font-bold font-sans mb-4">
+              Reserva de horários no Play e no Jóquei
+            </h1>
+            <button onClick={() => {resetPlayers(funcionamento, setFuncionamento, updateFuncionamentoData) }}
+              className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-2/4">Resetar horários</button>
+            <h2 className="text-xl text-center font-bold pb-2">
+              Selecione um dos clubes:
+            </h2>
+            <div className="flex mb-4">
+              {locations.map((location) => (
+                <button
+                  key={location.name}
+                  onClick={() => handleLocationClick(location.name)}
+                  className={`${selectedLocation === location.name ? 'border-blue-500' : 'border-gray-300'
+                    } border-2 p-2 mx-2 rounded-md`}
+                >
+                  <img
+                    src={`${location.name}.jpg`}
+                    alt={`Location ${location.name}`}
+                    className="w-32 h-32"
+                  />
+                </button>
               ))}
             </div>
+            {selectedLocation && (
+              <div>
+                <h2 className="text-xl font-semibold mb-2">Quadras do {selectedLocation}</h2>
+                <div className="grid text-black grid-cols-1 gap-4">
+                  {locations
+                    .find((location) => location.name === selectedLocation)
+                    ?.courts.map((courtName) => (
+                      <div
+                        key={courtName}
+                        className={`${selectedCourt === courtName ? 'bg-blue-400' : 'bg-indigo-900'
+                          } p-4 rounded-md shadow-md text-white text-center cursor-pointer`}
+                        onClick={() => handleCourtClick(courtName)}
+                      >
+                        <h3 className="text-lg font-semibold mb-2">{courtName}</h3>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {isCourtSelected && selectedCourtData && (
+             <TimeslotsList
+              selectedCourtData={selectedCourtData}
+              selectedCourt={selectedCourt}
+              handleTimeSlotClick={handleTimeSlotClick}
+              handleToggleAberto={handleToggleAberto}
+              />
+            )}
+            <ReservationModal
+              isModalOpen={isModalOpen}
+              userName={userName}
+              opponentName={opponentName}
+              selectedTimeSlot={selectedTimeSlot} // Pass the selected time slot
+              handleUserNameChange={handleUserNameChange}
+              handleOpponentNameChange={handleOpponentNameChange}
+              handleModalClose={handleModalClose}
+              handleConfirmReservation={handleConfirmReservation}
+            />
           </div>
-        )}
-        <ReservationModal
-          isModalOpen={isModalOpen}
-          userName={userName}
-          opponentName={opponentName}
-          selectedTimeSlot={selectedTimeSlot} // Pass the selected time slot
-          handleUserNameChange={handleUserNameChange}
-          handleOpponentNameChange={handleOpponentNameChange}
-          handleModalClose={handleModalClose}
-          handleConfirmReservation={handleConfirmReservation}
-        />
-      </div>
         </>
       ) : (
         <LoginForm />
