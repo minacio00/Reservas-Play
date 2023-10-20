@@ -11,6 +11,8 @@ interface TimeslotsListProps {
     selectedCourt: string | null
     handleToggleAberto: (day: string) => void;
     handleTimeSlotClick: (timeSlot: any, day: any) => void;
+    handleDisableTime: (timeSlot: any, day: any) => void;
+    handleSaveBtnClick: () => void;
 }
 
 const TimeslotsList: React.FC<TimeslotsListProps> = ({
@@ -18,10 +20,12 @@ const TimeslotsList: React.FC<TimeslotsListProps> = ({
     selectedCourt,
     handleToggleAberto,
     handleTimeSlotClick,
+    handleDisableTime,
+    handleSaveBtnClick
 }) => (
     <div>
         <h2 className="text-xl font-semibold mt-4">Horários disponíveis para {selectedCourt}</h2>
-        <button className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full">Salvar alterações</button>
+        <button onClick={() => handleSaveBtnClick()} className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full">Salvar alterações</button>
         <div className="grid grid-cols-1 gap-2 mt-2">
             {selectedCourtData.map((dayData: Timeslot) => (
                 <div key={dayData.dia}>
@@ -51,8 +55,17 @@ const TimeslotsList: React.FC<TimeslotsListProps> = ({
                                     ({timeSlot.slot}) <br />
                                     {timeSlot.jogador1} vs {timeSlot.jogador2}
                                 </button>
+                                
                                 <div className="px-2">
-                                    <label>ativo: </label>
+                                    <button
+                                        onClick={() => {
+                                            handleDisableTime(timeSlot, dayData.dia)
+                                         }
+                                        }
+                                        className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1"
+                                    >
+                                        {timeSlot.disponivel?(<span>Desativar dia</span>):(<span>Ativar dia</span>)}
+                                    </button>
                                 </div>
                             </div>
                         ))
