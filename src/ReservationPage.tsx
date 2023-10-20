@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { firebaseApp } from "../firebaseConfig";
 import {doc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
 import ReservationModal from './ReservationModal';
+import TimeslotsList from './TimeslotsList';
 
 export const ReservationPage = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>("Joquei");
@@ -75,7 +76,7 @@ export const ReservationPage = () => {
 
   const updateFuncionamentoData = async (updatedFuncionamento: any) => {
     const db = getFirestore(firebaseApp);
-    const docRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu");
+    const docRef = doc(db, "clubes", "tHBvy8cXxteUH7HfhrGE");
     await updateDoc(docRef, { funcionamento: updatedFuncionamento });
   };
 
@@ -96,7 +97,7 @@ export const ReservationPage = () => {
   const fetchData = async () => {
     const db = getFirestore(firebaseApp);
     try {
-      const docsRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu")
+      const docsRef = doc(db, "clubes", "tHBvy8cXxteUH7HfhrGE")
       const snapshot = await getDocFromServer(docsRef) //todo: from server
       // console.log(snapshot.data()?.funcionamento)
       const funcionamentoData = snapshot.data()?.funcionamento;
@@ -117,12 +118,13 @@ export const ReservationPage = () => {
     const selectedLocationData = getSelectedLocationData();
     if (!selectedLocationData) return null;
     const filteredDays = selectedLocationData.openingHours.map((day: any) => ({
+      aberto: day.aberto,
       dia: day.dia,
       timeSlots: day.quadras
         .filter((quadra: any) => quadra.nomeQuadra === selectedCourt)
         .map((quadra: any) => quadra.timeSlots)
     }));
-    // console.log("filtrados: ", filteredDays)
+    console.log("filtrados: ", filteredDays)
     return filteredDays
   };
 
@@ -187,18 +189,25 @@ export const ReservationPage = () => {
             <h2 className="text-xl font-semibold mt-4">Horários disponíveis para {selectedCourt}</h2>
             <div className="grid grid-cols-1 gap-2 mt-2">
               {selectedCourtData.map((dayData: any) => (
+                
                 <div key={dayData.dia}>
                   <h3 className="text-lg font-semibold">{dayData.dia}</h3>
                   {dayData.timeSlots && dayData.timeSlots[0] ? (
                     dayData.timeSlots[0].map((timeSlot: any) => (
+                      
                       <div key={timeSlot.slot}>
-                        <button
-                          onClick={() => handleTimeSlotClick(timeSlot, dayData.dia)}
-                          className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full"
-                        >
-                          ({timeSlot.slot}) <br />
-                          {timeSlot.jogador1} vs {timeSlot.jogador2}
-                        </button>
+                        {timeSlot.disponivel === true ? (
+                          <button
+                            onClick={() => handleTimeSlotClick(timeSlot, dayData.dia)}
+                            className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1 w-full"
+                          >
+                            ({timeSlot.slot}) <br />
+                            {timeSlot.jogador1} vs {timeSlot.jogador2}
+                          </button>
+                        ) : (
+                          <span></span>
+                        )}
+
                       </div>
                     ))
                   ) : (

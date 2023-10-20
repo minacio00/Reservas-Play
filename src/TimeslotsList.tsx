@@ -64,7 +64,7 @@ const TimeslotsList: React.FC<TimeslotsListProps> = ({
                                         }
                                         className="bg-indigo-900 text-white px-2 py-1 rounded-md my-1"
                                     >
-                                        {timeSlot.disponivel?(<span>Desativar dia</span>):(<span>Ativar dia</span>)}
+                                        {timeSlot.disponivel?(<span>Desativar horário</span>):(<span>Ativar horário</span>)}
                                     </button>
                                 </div>
                             </div>

@@ -88,7 +88,7 @@ export function AdminPage() {
       const selectedLocationIndex = updatedFuncionamento.findIndex((locationData) => locationData.name === selectedLocation);
       if (selectedLocationIndex !== -1) {
         const selectedDayIndex = updatedFuncionamento[selectedLocationIndex].openingHours.findIndex((dayData: any) =>
-          dayData.dia === selectedDay
+          dayData.dia === day
           //dayData.quadras.some((quadra: any) => quadra.nomeQuadra === selectedCourt)
 
         );
@@ -103,8 +103,8 @@ export function AdminPage() {
                 console.log(!timeSlot.disponivel, " valor disponivel negado")
                 return {
                   ...timeSlot,
-                  jogador1: userName,
-                  jogador2: opponentName,
+                  jogador1: timeSlot.jogador1,
+                  jogador2: timeSlot.jogador2,
                   disponivel: !timeSlot.disponivel
                 };
               }
@@ -237,6 +237,7 @@ export function AdminPage() {
           // Toggle the value of aberto
           const daydata = updatedFuncionamento[selectedLocationIndex].openingHours[selectedDayIndex]
           daydata.aberto = !daydata.aberto;
+          //pode ser ajudar a resolver o bug do diable time
           const updatedSelectedCourtData = [...selectedCourtData];
           const dayDataIndex = updatedSelectedCourtData.findIndex((dayData: any) => dayData.dia === day);
           if (dayDataIndex !== -1) {
