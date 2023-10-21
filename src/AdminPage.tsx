@@ -21,7 +21,7 @@ export function AdminPage() {
   const [opponentName, setOpponentName] = useState("");
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<any | null>(null);
   const [selectedDay, setSelectedDay] = useState("")
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
   const [selectedCourtData, setSelectedCourtData] = useState<any[]>()
 
   const handleTimeSlotClick = (timeSlot: any, day: any) => {
@@ -79,8 +79,37 @@ export function AdminPage() {
       }
     }
   };
+  // const addTimeSlot = () => {
+  //   const updatedFuncionamento = [...funcionamento]; // Create a copy of funcionamento
+   
+  //  debugger
+  //   updatedFuncionamento.forEach((locationData) => {
+  //     if (locationData.name === 'play') {
+  //       locationData.openingHours.forEach((dayData: any) => {
+  //         // Check if a timeslot with "21:00" already exists for the current day
+  //         const timeslotExists = dayData.quadras.some((quadra: any) => {
+  //           return quadra.timeSlots.some((timeSlot: any) => timeSlot.slot === '21:00');
+  //         });
+  
+  //         // If it doesn't exist, add the new timeslot
+  //         if (!timeslotExists) {
+  //           dayData.quadras.forEach((quadra: any) => {
+  //             quadra.timeSlots.push({
+  //               slot: '21:00',
+  //               jogador1: '', // isso vai deletar os horários já marcados,
+  //               jogador2: '',
+  //               disponivel: false,
+  //             });
+  //           });
+  //         }
+  //       });
+  //       updateFuncionamentoData(updatedFuncionamento);
+  //     }
+  //   });
+  
+  //   setFuncionamento(updatedFuncionamento);
+  // };
   const handleDisableTime = (currentTimeSlot: any, day: string) => {
-    console.log(currentTimeSlot.slot)
     setSelectedTimeSlot(currentTimeSlot);
     setSelectedDay(day)
     if (currentTimeSlot) {
@@ -99,8 +128,6 @@ export function AdminPage() {
           if (selectedQuadraIndex !== -1) {
             const updatedTimeSlots = updatedFuncionamento[selectedLocationIndex].openingHours[selectedDayIndex].quadras[selectedQuadraIndex].timeSlots.map((timeSlot: any) => {
               if (timeSlot.slot === currentTimeSlot.slot) {
-                console.log(timeSlot.disponivel, " valor disponivel atual")
-                console.log(!timeSlot.disponivel, " valor disponivel negado")
                 return {
                   ...timeSlot,
                   jogador1: timeSlot.jogador1,
@@ -124,14 +151,13 @@ export function AdminPage() {
 
   async function handleSaveBtnClick ()  {
     await updateFuncionamentoData(funcionamento);
-    console.log(funcionamento);
   }
 
   //todo: implementar handle para botão de salvar
 
   const updateFuncionamentoData = async (updatedFuncionamento: any) => {
     const db = getFirestore(firebaseApp);
-    const docRef = doc(db, "clubes", "tHBvy8cXxteUH7HfhrGE");
+    const docRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu");
     await updateDoc(docRef, { funcionamento: updatedFuncionamento });
   };
 
@@ -148,17 +174,17 @@ export function AdminPage() {
   const handleCourtClick = async (courtName: string) => {
     setSelectedCourt(courtName);
     setIsCourtSelected(true);
-    console.log(selectedCourtData)
   };
   const fetchData = async () => {
     const db = getFirestore(firebaseApp);
     try {
-      const docsRef = doc(db, "clubes", "tHBvy8cXxteUH7HfhrGE")
+      const docsRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu")
       const snapshot = await getDocFromServer(docsRef) //todo: from server
       // console.log(snapshot.data()?.funcionamento)
       const funcionamentoData = snapshot.data()?.funcionamento;
+      // addTimeSlotToPlayLocation(funcionamentoData)
       setFuncionamento(funcionamentoData);
-      setIsLoading(false);
+      // setIsLoading(false);
       //    const snap = addDoc(collection(db,"clubes"), {
       //     funcionamento
       //    })
@@ -189,12 +215,11 @@ export function AdminPage() {
     return filteredDays
   };
 
-  // const selectedCourtData = getSelectedCourtData();
-  // console.log(selectedCourtData)
   useEffect(() => {
     fetchData();
-    // updateFuncionamentoData(funcionamentoArr)
+    
   }, [])
+  
 
   useEffect(() => {
     setSelectedCourtData(getSelectedCourtData());
@@ -251,7 +276,6 @@ export function AdminPage() {
     }
   };
   useEffect(() => {
-    console.log(funcionamento, "dentro do UE")
   },[funcionamento])
   
   return (

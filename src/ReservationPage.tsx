@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { firebaseApp } from "../firebaseConfig";
 import {doc, getDocFromServer, getFirestore, updateDoc } from "firebase/firestore";
 import ReservationModal from './ReservationModal';
-import TimeslotsList from './TimeslotsList';
 
 export const ReservationPage = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>("Joquei");
@@ -76,7 +75,7 @@ export const ReservationPage = () => {
 
   const updateFuncionamentoData = async (updatedFuncionamento: any) => {
     const db = getFirestore(firebaseApp);
-    const docRef = doc(db, "clubes", "tHBvy8cXxteUH7HfhrGE");
+    const docRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu");
     await updateDoc(docRef, { funcionamento: updatedFuncionamento });
   };
 
@@ -97,7 +96,7 @@ export const ReservationPage = () => {
   const fetchData = async () => {
     const db = getFirestore(firebaseApp);
     try {
-      const docsRef = doc(db, "clubes", "tHBvy8cXxteUH7HfhrGE")
+      const docsRef = doc(db, "clubes", "e6z5OS6uXNh1mhMeSlfu")
       const snapshot = await getDocFromServer(docsRef) //todo: from server
       // console.log(snapshot.data()?.funcionamento)
       const funcionamentoData = snapshot.data()?.funcionamento;
@@ -113,6 +112,7 @@ export const ReservationPage = () => {
   const getSelectedLocationData = () => {
     return funcionamento.find((locationData) => locationData.name === selectedLocation);
   };
+  
 
   const getSelectedCourtData = () => {
     const selectedLocationData = getSelectedLocationData();

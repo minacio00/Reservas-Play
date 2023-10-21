@@ -3,9 +3,7 @@ import { useState } from "react";
 // import { getAuth } from "firebase/auth";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { firebaseApp } from "../firebaseConfig";
-interface LoginFormProps {
- 
-}
+
 const LoginForm = () => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
